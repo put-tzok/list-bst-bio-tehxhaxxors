@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-unsigned int ns[] = { 10, /* TODO: fill values which will be used as lists' sizes */ };
+unsigned int ns[] = { 10, 100, 1000, 10000, 20000, 50000/* TODO: fill values which will be used as lists' sizes */ };
 
 // each list node contains an integer key value and pointer to next list node
 struct node {
@@ -17,22 +17,52 @@ struct node *head = NULL;
 
 
 struct node* list_insert(int value) {
-    // TODO: implement
-    return NULL;
+    struct node* new_node = (struct node*)malloc(sizeof(struct node));
+    new_node->key = value;
+    new_node->next = head;
+    head = new_node;
+
+    return new_node;
 }
 
 struct node* list_search(int value) {
-    // TODO: implement
-    return NULL;
+    struct node* iter = head;
+    while(iter != NULL && iter->key != value){
+        iter = iter->next;
+    }
+
+    return iter;
 }
 
 void list_delete(int value) {
-    // TODO: implement
+    struct node* to_del = head;
+    if(to_del != NULL && to_del->key == value){
+        head = head->next;
+        free(to_del);
+    }
+    else {
+        struct node* prev = head;
+        while(to_del != NULL & to_del->key != value){
+            prev = to_del;
+            to_del = to_del->next;
+        }
+        if(to_del == NULL){
+            return;
+        }
+        prev->next = to_del->next;
+        free(to_del);
+    }
+    return;
 }
 
 unsigned int list_size() {
-    // TODO: implement
-    return 0;
+    unsigned int size = 0;
+    struct node* iter = head;
+    while(iter != NULL ){
+        size++;
+        iter = iter->next;
+    }
+    return size;
 }
 
 /*
@@ -116,7 +146,7 @@ int main() {
 
             free(t);
 
-            printf("%d\t%s\t%f\t%f\n", n, enable_shuffle ? "true" : "false",
+            printf("%6d\tShuffle: %s\t%6f\t%10f\n", n, enable_shuffle ? "true" : "false",
                     (double)insertion_time / CLOCKS_PER_SEC,
                     (double)search_time / CLOCKS_PER_SEC);
         }

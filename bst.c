@@ -14,33 +14,159 @@ struct node {
     struct node *right;
 };
 
+struct node* newNode(int key){
+    struct node* temp = (struct node*)malloc(sizeof(struct node));
+    temp->key = key;
+    temp->left = NULL;
+    temp->right = NULL;
+    return temp;
+};
+
 // tree's beginning is called the root
 struct node *root = NULL;
 
 struct node **tree_search(struct node **candidate, int value) {
-    // TODO: implement
-    return NULL;
+    //printf("JESTEM TU\n");
+
+    if(value < (*candidate)->key){
+        return tree_search((*candidate)->left, value);
+    }
+    if(value > (*candidate)->key){
+        return tree_search(&((*candidate)->right), value);
+    }
+    return candidate;
 }
 
 struct node* tree_insert(int value) {
-    // TODO: implement
-    return NULL;
+    struct node* new_node = newNode(value);
+    if(root == NULL){
+        root = new_node;
+        return new_node;
+    }
+    struct node* ptr = root;
+    while(1){
+        if(value == ptr->key){
+            return NULL;
+        }
+        if(value < ptr->key){
+            if(ptr->left == NULL){
+                ptr->left = new_node;
+                return new_node;
+            }
+            ptr = ptr->left;
+        } else {
+            if(ptr->right == NULL){
+                ptr->right = new_node;
+
+                /*
+                //PRINT LISTA
+                ptr = root;
+                printf("LISTA:\n");
+                while(ptr){
+                    printf("%d\t", ptr->key);
+                    ptr = ptr->right;
+                }
+                */
+
+                return new_node;
+            }
+            ptr = ptr->right;
+        }
+    }
 }
 
 
 
 struct node **tree_maximum(struct node **candidate) {
-    // TODO: implement
-    return NULL;
+    if((*candidate)->right){
+        return tree_maximum((*candidate)->right);
+    }
+    return candidate;
+}
+
+void zero_node(struct node* node){
+    node->key = NULL;
+    node->left = NULL;
+    node->right = NULL;
 }
 
 void tree_delete(int value) {
-    // TODO: implement
+    struct node* to_del = root;
+    to_del = root;
+    bool found = false;
+    while(to_del && !found){
+        if(value < to_del->key){
+            to_del = to_del->left;
+        } else if(value > to_del->key){
+            to_del = to_del->right;
+        } else {
+            found = true;
+        }
+    }
+    // return current -> delete
+    if(!(to_del->left) && !(to_del->right)){
+
+        printf("\n\nno siema\n\n");
+        free(to_del);
+
+        //PRINT LISTA
+                struct node* ptr = root;
+                printf("LISTA:\n");
+                while(ptr){
+                    printf("%d\t", ptr->key);
+                    ptr = ptr->right;
+                }
+    } else if(to_del->left && to_del->right == NULL){
+        to_del = to_del->left;
+    } else if(to_del->left == NULL && to_del->right){
+        to_del = to_del->right;
+    } else {
+
+        struct node* max_node = tree_maximum(to_del->left);
+        printf("Max_node: %d", max_node->key);
+        to_del->key = max_node->key;
+        max_node = max_node->left;
+        printf("Max_node: %d", max_node->key);
+    }
 }
 
 unsigned int tree_size(struct node *element) {
-    // TODO: implement
-    return 0;
+    //PRINT LISTA
+                struct node* ptr = root;
+                printf("LISTA:\n");
+                while(ptr){
+                    printf("%d\t", ptr->key);
+                    ptr = ptr->right;
+                }
+    if(!root){
+        return 0;
+    }
+    int counter = 0;
+    if(element->left){
+        counter += 1;
+        counter += tree_size_rec(element->left);
+    }
+    if(element->right){
+        counter += 1;
+        counter+= tree_size_rec(element->right);
+    }
+    //dolicz za root
+    counter++;
+    printf("Counter: %d", counter);
+    return counter;
+}
+
+int tree_size_rec(struct node* element){
+    int counter = 0;
+    if(element->left){
+        counter += 1;
+        counter += tree_size_rec(element->left);
+    }
+    if(element->right){
+        counter += 1;
+        counter+= tree_size_rec(element->right);
+    }
+    return counter;
 }
 
 /*
@@ -92,6 +218,7 @@ bool is_bst(struct node *element) {
     }
     // only right subnode? check it recursively
     if (element->left == NULL && element->right != NULL) {
+        printf("CHECKING: %d\n", element->key);
         return (element->key < element->right->key) && is_bst(element->right);
     }
     // only left subnode? check it recursively

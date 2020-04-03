@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-unsigned int ns[] = { 10, 100, 1000, 10000, 20000, 50000/* TODO: fill values which will be used as lists' sizes */ };
+unsigned int ns[] = { 1000, 4269, 5000, 7500, 7551, 10000, 15155, 20000, 30000, 40000/* TODO: fill values which will be used as lists' sizes */ };
 
 // each list node contains an integer key value and pointer to next list node
 struct node {
@@ -95,6 +95,19 @@ void shuffle(int *t, int n) {
 }
 
 int main() {
+    // ZERO THE FILE - FOR DATA EXTRACTION
+    FILE *data = fopen("data_list.dat", "w");
+    fclose(data);
+
+    fopen("data_list.dat", "a");
+        if(data == NULL){
+            fprintf(stderr, "\nProblem z otwarciem pliku data!\n");
+            exit (1);
+        };
+        fprintf(data, "DATA FOR LIST\nArray size:\t    Shuffle\tInsertion time\tSearch time\n");
+        fclose(data);
+
+    printf("Array size:\t    Shuffle\tInsertion time\tSearch time\n");
     bool no_yes[] = { false, true };
 
     for (unsigned int i = 0; i < sizeof(no_yes) / sizeof(*no_yes); i++) {
@@ -146,9 +159,21 @@ int main() {
 
             free(t);
 
-            printf("%6d\tShuffle: %s\t%6f\t%10f\n", n, enable_shuffle ? "true" : "false",
+            printf("%10d\t%10s\t%10f\t%10f\n", n, enable_shuffle ? "true" : "false",
                     (double)insertion_time / CLOCKS_PER_SEC,
                     (double)search_time / CLOCKS_PER_SEC);
+
+                    // APPEND DATA TO FILE
+
+                FILE *data = fopen("data_list.dat", "a");
+                if(data == NULL){
+                    fprintf(stderr, "\nProblem z otwarciem pliku data!\n");
+                    exit (1);
+                };
+                fprintf(data, "%10d\t%10s\t%10f\t%10f\n", n, enable_shuffle ? "true" : "false",
+                    (double)insertion_time / CLOCKS_PER_SEC,
+                    (double)search_time / CLOCKS_PER_SEC);
+                fclose(data);
         }
     }
     return 0;

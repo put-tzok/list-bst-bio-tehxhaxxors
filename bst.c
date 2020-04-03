@@ -343,6 +343,21 @@ char *insert_names[] = { "Increasing", "Random", "Binary" };
 void (*insert_functions[])(int*, int) = { insert_increasing, insert_random, insert_binary };
 
 int main(int argc, char **argv) {
+
+    // ZERO THE FILE - FOR DATA EXTRACTION
+    FILE *data = fopen("data_bst.dat", "w");
+    fclose(data);
+
+    // APPEND DATA TO FILE
+
+    fopen("data_bst.dat", "a");
+        if(data == NULL){
+            fprintf(stderr, "\nProblem z otwarciem pliku data!\n");
+            exit (1);
+        };
+        fprintf(data, "DATA FOR BST\n\Array size\tInsertion name\t  Insertion time  Search time\n");
+        fclose(data);
+
     printf("Array size\tInsertion name\t  Insertion time  Search time\n");
     for (unsigned int i = 0; i < sizeof(insert_functions) / sizeof(*insert_functions); i++) {
         void (*insert)(int*, int) = insert_functions[i];
@@ -393,6 +408,20 @@ int main(int argc, char **argv) {
                     insert_names[i],
                     (double)insertion_time / CLOCKS_PER_SEC,
                     (double)search_time / CLOCKS_PER_SEC);
+
+                // APPEND DATA TO FILE
+
+                FILE *data = fopen("data_bst.dat", "a");
+                if(data == NULL){
+                    fprintf(stderr, "\nProblem z otwarciem pliku data!\n");
+                    exit (1);
+                };
+                fprintf(data, "%10d\t%10s\t%10f\t%10f\n",
+                    n,
+                    insert_names[i],
+                    (double)insertion_time / CLOCKS_PER_SEC,
+                    (double)search_time / CLOCKS_PER_SEC);
+                fclose(data);
         }
     }
     return 0;

@@ -104,64 +104,68 @@ void tree_delete(int value) {
     printf("\n\nDELETING: %d\n\n", value);
     struct node* to_del = root;
     struct node* prev = to_del;
-    struct node* to_del_prev = prev;
     bool found = false;
+
     // znajdz rzecz to wyrzucenia
     while(to_del && !found){
         if(value < to_del->key){
-            to_del_prev = prev;
             prev = to_del;
             to_del = to_del->left;
         } else if(value > to_del->key){
-            to_del_prev = prev;
             prev = to_del;
             to_del = to_del->right;
         } else {
             found = true;
         }
     }
+
     //przypadek gdy root jest do wyrzucenia
     if(to_del == root){
-        //printf("\nZNALAZLEM ROOT\n");
         if(!(root->left) && !(root->right)){
             root = NULL;
             free(to_del);
             return;
         }
+        struct node* ptr = to_del;
         if(to_del->left){
-            prev = tree_maximum(&(to_del->left));
-            prev->right = to_del->right;
-            root = prev;
-            // trzeba usunac polaczenie miedzy poprzednim przed prev a prev
-            if(to_del->left->right){
-                struct node* fix_connection = to_del->left->right;
-                //znajdz poprzedni przed prev
-                while(fix_connection->right != prev){
-                    fix_connection = fix_connection->right;
+            ptr = to_del->left;
+            if(ptr->right){
+                struct node* ptr_prev = ptr;
+                while(ptr->right){
+                    ptr_prev = ptr;
+                    ptr = ptr->right;
                 }
-                // ustaw odpowiednie right
-                fix_connection->right = NULL;
-                // teraz trzeba polaczyc minimum z poddrzewa prev->left z to_del->left
-                if(prev->left){
-                   fix_connection = prev;
-                    while(fix_connection->left){
-                        fix_connection = fix_connection->left;
-                    }
-                    fix_connection->left = to_del->left;
-                }
-            }
-            free(to_del);
-            return;
-        } else {
-            root = prev->right;
-            free(to_del);
-            return;
-        }
-        //printf("ROOT key: %d\n\n", root->key);
-    }
 
+                if(ptr->left){
+                    ptr_prev->right = ptr->left;
+                } else{
+                    ptr_prev->right = NULL;
+                }
+
+                if(to_del->right){
+                    ptr->right = to_del->right;
+                } else{
+                    ptr->right = NULL;
+                }
+
+                ptr->left = to_del->left;
+            }
+        }
+        else{
+            if(to_del->right){
+                ptr = to_del->right;
+            printf("jestem tutaj\n");
+            } else {
+                root = NULL;
+                free(to_del);
+                return;
+            }
+        }
+        root = ptr;
+        free(to_del);
+        return;
+    }
     else{
-    printf("nie robie ifa\n");
      if(!(to_del->left) && !(to_del->right)){
         if(to_del == prev->left){
             prev->left = NULL;
@@ -177,7 +181,6 @@ void tree_delete(int value) {
             free(to_del);
             return;
         } else{
-            //TUTAJ TRZEBA BEDZIE POSORTOWAC DRZEWO
             prev->right = to_del->left;
             free(to_del);
             return;
@@ -195,66 +198,39 @@ void tree_delete(int value) {
             return;
         }
     } else if(to_del->left && to_del->right){
-        if(to_del->left){
-            prev = tree_maximum(&(to_del->left));
-            //printf("PREV key: %d\n", prev->key);
+        struct node* ptr = to_del->left;
+        struct node* ptr_prev = ptr;
 
-            printf("\nto_del key: %d\n", to_del->key);
-            printf("to_del_prev key: %d\n", to_del_prev->key);
-            //costam = prev
-            if(to_del_prev->key > prev->key){
-            // TU ZNIKAJA RZECZY!!!
-printf("\nLISTA:\n");
-print_bst(root);
-printf("\n");
-                to_del_prev->left = prev;
-            } else{
-                to_del_prev->right = prev;
+        if(ptr->right){
+
+            while(ptr->right){
+                ptr_prev = ptr;
+                ptr = ptr->right;
             }
-printf("\nLISTA:\n");
-print_bst(root);
-printf("\n");
-            // trzeba usunac polaczenie miedzy poprzednim przed prev a prev
-            if(to_del->left->right){
-                struct node* fix_connection = to_del->left->right;
-                //znajdz poprzedni przed prev
 
-                //printf("fix connection key: %d\n", fix_connection->key);
-                while(fix_connection->right != prev){
-                //printf("fix connection key: %d\n", fix_connection->key);
-
-                    fix_connection = fix_connection->right;
-
-                }
-                //printf("\n\nsiema\n\n");
-                //printf("fix connection ->right key: %d\n", fix_connection->right->key);
-
-                // ustaw odpowiednie right
-                fix_connection->right = NULL;
-
-//printf("PREV left key: %d\n", prev->left->key);
-                // teraz trzeba polaczyc minimum z poddrzewa prev->left z to_del->left
-                if(prev->left){
-                   fix_connection = prev;
-                    while(fix_connection->left){
-                        //printf("fix_connection->left->key: %d\n", fix_connection->left->key);
-                        fix_connection = fix_connection->left;
-                    }
-                    //printf("fix_connection->left->key: %d\n", to_del->left->key);
-                    //printf("fix_connection->left->left->key: %d\n", to_del->left->left->key);
-                    //fix_connection->left = to_del->left;
-                }
+            if(ptr->left){
+                ptr_prev->right = ptr->left;
             }
-            free(to_del);
-            return;
-        } else {
-            root = prev->right;
-            free(to_del);
-            return;
+            else {
+                ptr_prev->right = NULL;
+            }
+            ptr->right = to_del->right;
+            ptr->left = to_del->left;
+        }
+        else{
+            ptr->right = to_del->right;
+        }
+
+        if(to_del == prev->left){
+            prev->left = ptr;
+        } else{
+            prev->right = ptr;
+        }
+
+        free(to_del);
+        return;
         }
     }
-    }
-
 }
 
 unsigned int tree_size(struct node *element) {
@@ -367,6 +343,7 @@ void insert_random(int *t, int n) {
 }
 
 void insert_binary(int *t, int n) {
+    printf("Robie binary!\n");
     // TODO: implement
 }
 

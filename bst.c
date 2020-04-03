@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <time.h>
 
-unsigned int ns[] = { 10, /* TODO: fill values which will be used as lists' sizes */ };
+unsigned int ns[] = { 1000, 4269, 5000, 7500, 7551, 10000, 15155, 20000, 30000, 40000/* TODO: fill values which will be used as lists' sizes */ };
 
 // each tree node contains an integer key and pointers to left and right children nodes
 struct node {
@@ -35,8 +35,6 @@ void print_bst(struct node *node)
 struct node *root = NULL;
 
 struct node **tree_search(struct node **candidate, int value) {
-    //printf("SEARCHING FOR: %d\n", value);
-
     if(value < (*candidate)->key){
         return tree_search(&((*candidate)->left), value);
     }
@@ -47,7 +45,6 @@ struct node **tree_search(struct node **candidate, int value) {
 }
 
 struct node* tree_insert(int value) {
-    printf("INSERTING: %d\n", value);
     struct node* new_node = newNode(value);
     if(root == NULL){
         root = new_node;
@@ -67,15 +64,6 @@ struct node* tree_insert(int value) {
         } else {
             if(ptr->right == NULL){
                 ptr->right = new_node;
-                /*
-                //PRINT LISTA
-                ptr = root;
-                printf("LISTA:\n");
-                while(ptr){
-                    printf("%d\t", ptr->key);
-                    ptr = ptr->right;
-                }
-                */
                 return new_node;
             }
             ptr = ptr->right;
@@ -86,22 +74,14 @@ struct node* tree_insert(int value) {
 
 
 struct node **tree_maximum(struct node **candidate) {
-        //printf("\nno siema\n");
-    //printf("Candidate right: %d\n", (*candidate)->right);
-
     if((*candidate)->right != NULL){
-    printf("Candidate key: %d\n", (*candidate)->key);
-
         return tree_maximum(&((*candidate)->right));
     } else {
-            printf("Candidate key: %d\n", (*candidate)->key);
-
         return *candidate;
     }
 }
 
 void tree_delete(int value) {
-    printf("\n\nDELETING: %d\n\n", value);
     struct node* to_del = root;
     struct node* prev = to_del;
     bool found = false;
@@ -150,11 +130,17 @@ void tree_delete(int value) {
 
                 ptr->left = to_del->left;
             }
+            else {
+                if(to_del->right){
+                    ptr->right = to_del->right;
+                } else{
+                    ptr->right = NULL;
+                }
+            }
         }
         else{
             if(to_del->right){
                 ptr = to_del->right;
-            printf("jestem tutaj\n");
             } else {
                 root = NULL;
                 free(to_del);
@@ -186,13 +172,11 @@ void tree_delete(int value) {
             return;
         }
     } else if(!(to_del->left) && to_del->right){
-        //printf("Robie to\n");
         if(to_del == prev->left){
             prev->left = to_del->right;
             free(to_del);
             return;
         } else{
-            //TUTAJ TRZEBA BEDZIE POSORTOWAC DRZEWO
             prev->right = to_del->right;
             free(to_del);
             return;
@@ -248,8 +232,6 @@ unsigned int tree_size(struct node *element) {
     }
     //dolicz za root
     counter++;
-    printf("Counter: %d\n", counter);
-    print_bst(root);
     return counter;
 }
 
@@ -336,21 +318,32 @@ void insert_increasing(int *t, int n) {
 
 void insert_random(int *t, int n) {
     shuffle(t, n);
-    printf("\n\nno jestem tutaj\n\n");
     for (int i = 0; i < n; i++) {
         tree_insert(t[i]);
     }
 }
 
+void insert_binary_recur(int *t, int start, int end, int stop){
+    if(start > end){
+        return NULL;
+    }
+    int mid = (start + end)/2;
+    if(mid != stop){
+    tree_insert(t[mid]);
+    insert_binary_recur(t, start, mid-1, stop);
+    insert_binary_recur(t, mid+1, end, stop);
+    }
+}
+
 void insert_binary(int *t, int n) {
-    printf("Robie binary!\n");
-    // TODO: implement
+    insert_binary_recur(t, 0, n, n);
 }
 
 char *insert_names[] = { "Increasing", "Random", "Binary" };
 void (*insert_functions[])(int*, int) = { insert_increasing, insert_random, insert_binary };
 
 int main(int argc, char **argv) {
+    printf("Array size\tInsertion name\t  Insertion time  Search time\n");
     for (unsigned int i = 0; i < sizeof(insert_functions) / sizeof(*insert_functions); i++) {
         void (*insert)(int*, int) = insert_functions[i];
 
@@ -387,7 +380,6 @@ int main(int argc, char **argv) {
 
             // delete every element in the order present in array `t`
             for (unsigned int l = 0, m = n; l < n; l++, m--) {
-                printf("m = %d\n", m);
                 assert(tree_size(root) == m);   // tree size must be equal to the expected value
                 tree_delete(t[l]);
                 assert(is_bst(root));           // after deletion, tree must still be valid BST
@@ -396,8 +388,7 @@ int main(int argc, char **argv) {
 
             free(root);
             free(t);
-
-            printf("%d\t%s\t%f\t%f\n",
+            printf("%10d\t%10s\t%10f\t%10f\n",
                     n,
                     insert_names[i],
                     (double)insertion_time / CLOCKS_PER_SEC,
